@@ -449,7 +449,7 @@ void Mathe::initTabela()
         tabela[ x ] = x < 11 ? x : x - 10;
     //first reel
     /*
-    /// firt reel
+    /// first reel
     xca[1][1]= result[0];
     xca[2][1]= result[1];
     xca[3][1]= result[2];
@@ -465,7 +465,7 @@ void Mathe::initTabela()
     xca[1][4]= result[9];
     xca[2][4]= result[10];
     xca[3][4]= result[11];
-    //fivy reel
+    //five reel
     xca[1][5]= result[12];
     xca[2][5]= result[13];
     xca[3][5]= result[14];
@@ -528,9 +528,26 @@ bool Mathe::isMatchCredits(double currentCredits)
     return false;
 }
 //------------------------------------------------------------------
-void Mathe::play(const int aposta_, const int linhas_,const  bool lock_, const int gamePosition,const int favPosition, int * result,const float porcent, double currentCredits) {
-	/* Launch Bonus */
-	if (isMatchCredits(currentCredits))
+void Mathe::play(const int aposta_, const int linhas_,const  bool lock_, const int gamePosition,const int favPosition, int * result,const float porcent, double currentCredits, Bank& bank) {
+    bool easyGame = false;
+    bool normalGame = false;
+    bool hardGame = false;
+	/*
+	 *  Joga o game par ao nivel hard quando desta muito abaixo do
+	 */
+	bank.updateGame();
+	bool isVeryHard = bank.isVeryHard();
+	if (isVeryHard) {
+	    if (!(get_randi() % 150)) { // !!!!! 150
+	        normalGame = true;
+	    } else {
+	        hardGame = true;
+	    }
+	}
+	/*
+	 * Bonificacao aleatoria para quando o gamer insere mais de R$50,00
+	 */
+	if (isMatchCredits(currentCredits) && !isVeryHard)
 	{
 		int sym = 4; // No init necessary, just a safeguard ghost
 		int count = 0;
@@ -569,8 +586,7 @@ void Mathe::play(const int aposta_, const int linhas_,const  bool lock_, const i
     saiuac = false;
     trava = false;
     caraca = false;
-    if((lock_== 0) && (gamePosition >= favPosition) && (aposta >=2) && (linhas_>=20))
-    {
+    if ((lock_== 0) && (gamePosition >= favPosition) && (aposta >=2) && (linhas_>=20) && !isVeryHard) {
         //unlock acum
         saiuac = true;
         trava = true;
@@ -580,31 +596,19 @@ void Mathe::play(const int aposta_, const int linhas_,const  bool lock_, const i
     // doSpin();
     // See if we need to have easy or difficult game
     // currentDev = (aposta*linhas_) / porcento;
-    bool easyGame = false;
-    bool normalGame = false;
-    bool hardGame = false;
     bool skipThisGame = false;
     int porcento = static_cast<int>(porcent);
     //in this time retention < 50
-    if ((aposta > 15 || (porcento < 1)) /*&& = (AND) (porcent > 1)*/)
-    {
+    if (((aposta > 15 || (porcento < 1)) && !isVeryHard) /*&& = (AND) (porcent > 1)*/) {
         hardGame = true;
     }
-    // else
-    // if ((porcento < 1)) // || = OR
-    // {
-    //     hardGame = true;
-    // }
-    ///////////////
-    /* my insert */
-    ///////////////
+    /* minha insersão do nivel normal */
     else
-    if (!(get_randi() % 150)) // !!!!! 150
-    {
+    if (!(get_randi() % 150) && !isVeryHard) { // !!!!! 150
         normalGame = true;
     }
     else
-    {
+    if (!isVeryHard){
         easyGame = true;
     }
     // Try making a spin until we get what we like from it
@@ -612,7 +616,7 @@ void Mathe::play(const int aposta_, const int linhas_,const  bool lock_, const i
     {
         bingo10();
         //tabelaToScreenshot();
-        if (easyGame) // Easy game
+        if (easyGame && !isVeryHard) // Easy game
         {
             int sym = 4; // No init necessary, just a safeguard ghost
             int count = 0;
@@ -678,16 +682,16 @@ void Mathe::play(const int aposta_, const int linhas_,const  bool lock_, const i
         {
             /////////////////////////////////////////////
             // Create tails.
-            // 0=caldeirao bonus
-            // 1=espantalho      premio menor valor
-            // 2=witch bonus
+            // 0=cauldron		bonus
+            // 1=straw man		premio menor valor
+            // 2=witch			bonus
             // 3=dracula
-            // 4=fantasma
-            // 5=bruxa
+            // 4=ghost
+            // 5=witch
             // 6=monster
-            // 7=abobora
-            // 8=demo
-            // 9=magic KAT    premio maior valor
+            // 7=pumpkin
+            // 8=demon
+            // 9=magic cat		premio maior valor
             std::vector<int> l_strip = {
 				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 				3, 3, 3, 3, 3, 3, 3, 3,
@@ -696,20 +700,20 @@ void Mathe::play(const int aposta_, const int linhas_,const  bool lock_, const i
 				6, 6, 6, 6, 6,
 				7, 7, 7, 7, 7,
 				8, 8,
-				9, 9,
+				9,
 				2,
 				0
 			};
 			std::vector<int> c_strip = {
-				1, 1, 1,
+				1, 1, 1, 1,
 				3, 3, 3,
 				4, 4, 4,
 				5, 5, 5,
 				6, 6, 6,
 				7, 7, 7,
-				8, 8, 8,
-				9, 9,
-				2, 2,
+				8,
+				9,
+				2,
 				0
 			};
 			std::vector<int> r_strip = {
@@ -719,56 +723,52 @@ void Mathe::play(const int aposta_, const int linhas_,const  bool lock_, const i
 				5, 5, 5, 5, 5, 5, 5,
 				6, 6, 6,
 				7, 7, 7, 7, 7,
-				8, 8, 8,
-				9, 9,
-				2, 2,
+				8, 8,
+				9,
+				2,
 				0
 			};
-            // //first reel
+            // first reel
 			shuffleVector(l_strip.begin(), l_strip.end());
 			result[0] = l_strip[static_cast<std::size_t>(get_randi()) % l_strip.size()];
 			result[5] = l_strip[static_cast<std::size_t>(get_randi()) % l_strip.size()];
 			result[10] = l_strip[static_cast<std::size_t>(get_randi()) % l_strip.size()];
-			// //second reel
+			// second reel
 			shuffleVector(c_strip.begin(), c_strip.end());
 			result[1] = c_strip[static_cast<std::size_t>(get_randi()) % c_strip.size()];
 			result[6] = c_strip[static_cast<std::size_t>(get_randi()) % c_strip.size()];
 			result[11] = c_strip[static_cast<std::size_t>(get_randi()) % c_strip.size()];
-			// //thirt reel
+			// thirt reel
 			shuffleVector(c_strip.begin(), c_strip.end());
 			result[2] = c_strip[static_cast<std::size_t>(get_randi()) % c_strip.size()];
 			result[7] = c_strip[static_cast<std::size_t>(get_randi()) % c_strip.size()];
 			result[12] = c_strip[static_cast<std::size_t>(get_randi()) % c_strip.size()];
-			// //fourth reel
+			// fourth reel
 			shuffleVector(c_strip.begin(), c_strip.end());
 			result[3] = c_strip[static_cast<std::size_t>(get_randi()) % c_strip.size()];
 			result[8] = c_strip[static_cast<std::size_t>(get_randi()) % c_strip.size()];
 			result[13] = c_strip[static_cast<std::size_t>(get_randi()) % c_strip.size()];
-			// //fivy reel
+			// five reel
 			shuffleVector(r_strip.begin(), r_strip.end());
 			result[4] = r_strip[static_cast<std::size_t>(get_randi()) % r_strip.size()];
 			result[9] = r_strip[static_cast<std::size_t>(get_randi()) % r_strip.size()];
 			result[14] = r_strip[static_cast<std::size_t>(get_randi()) % r_strip.size()];
         }
-        if (skipThisGame)
-        {
+        if (skipThisGame) {
             continue;
-        }
-        else
-        {
+        } else {
             break;//end sort
         }
     }
 	// Calculate total win and bonus multipliers
 	// return win;
 	// end for sort
-    for(int x = 0; x < 15; ++x)
-    {
-        result[ x ] = tabela[x + 1];//RETURN IN RESULT
+    for(int x = 0; x < 15; ++x) {
+        result[ x ] = tabela[x + 1]; // RETURN IN RESULT
     }
     skipThisGame= 0;
     /*
-    /// firt reel
+    /// first reel
     xca[1][1]= result[0];
     xca[2][1]= result[1];
     xca[3][1]= result[2];
@@ -784,7 +784,7 @@ void Mathe::play(const int aposta_, const int linhas_,const  bool lock_, const i
     xca[1][4]= result[9];
     xca[2][4]= result[10];
     xca[3][4]= result[11];
-    //fivy reel
+    //five reel
     xca[1][5]= result[12];
     xca[2][5]= result[13];
     xca[3][5]= result[14];

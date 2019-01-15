@@ -17,6 +17,8 @@
 #include <ctime>
 #include <algorithm>
 
+#include "bank.h"
+
 // #include "defines.h"
 #define MINIMUM_CREDITS_INSERTED_TO_BONUS 50.00    // + R$50,00
 //commnet for use rand
@@ -79,7 +81,7 @@ public:
 
     // result is an array of 15 elements which represents the reels,
     // up to down, left to right.
-    void play(const int aposta_, const int linhas_, const bool lock_, const int gamePosition, const int favPosition, int *result , const float porcent, double currentCredits);
+    void play(const int aposta_, const int linhas_, const bool lock_, const int gamePosition, const int favPosition, int *result , const float porcent, double currentCredits, Bank& bank);
     int  testLine(int lineTest,int premiunTest,int numberSlotsTest);
     void changeSlot(int LinePosition,int premiunToChanged,int premiunSlots);
     int testPremiun(int slot1,int slot2,int slot3,int slot4,int slot5,int premiunToVerify,int numberSlotsTest);
