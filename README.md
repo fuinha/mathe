@@ -1,1 +1,3 @@
 # mathe
+
+* make clean all
